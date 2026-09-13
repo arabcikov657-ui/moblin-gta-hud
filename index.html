@@ -70,11 +70,12 @@ body {
 .timeRow {
   display:flex;
   align-items:flex-end;
-  justify-content:center;
+  justify-content:flex-start;   /* время влево */
   overflow:visible;
-  padding-bottom:8px; /* расстояние до полоски */
-}
 
+  padding-left:1.2%;            /* совпадает с левым краем полоски */
+  padding-bottom:0;
+}
 
 #clock {
   color:var(--white);
@@ -85,8 +86,8 @@ body {
   letter-spacing:-.025em;
   white-space:nowrap;
 
-  transform:scaleX(1.08);
-  transform-origin:center bottom;
+  transform:scaleX(1.08) translateY(7px); /* опускаем ниже */
+  transform-origin:left bottom;
 
   -webkit-text-stroke:6px var(--black);
   paint-order:stroke fill;
