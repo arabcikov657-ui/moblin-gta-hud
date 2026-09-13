@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>whynot778 GTA HUD</title>
+<style>
+  :root{
+    --purple:#8f19ff;
+    --purple2:#b85cff;
+    --green:#51d62e;
+    --green2:#7cff4b;
+    --red:#ff5151;
+    --outline:#050505;
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden;
+    background:transparent !important;
+  }
+
+  body{
+    font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Весь HUD. Moblin сам масштабирует browser widget. */
+  #hud{
+    position:absolute;
+    inset:0;
+    display:grid;
+    grid-template-columns: 30% 70%;
+    grid-template-rows: 46% 15% 39%;
+    gap:0;
+    padding:3.5%;
+    background:transparent;
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.45));
+    user-select:none;
+    pointer-events:none;
+  }
+
+  /* Самокат */
+  .scooter-box{
+    grid-column:1;
+    grid-row:1 / 4;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:1%;
+  }
+
+  .scooter-frame{
+    width:91%;
+    aspect-ratio:1/1;
+    border:6px solid var(--outline);
+    border-radius:21%;
+    background:linear-gradient(135deg, rgba(255,255,255,.97), rgba(235,235,235,.97));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:
+      inset 0 0 0 2px rgba(255,255,255,.6),
+      0 2px 0 rgba(255,255,255,.1);
+  }
+
+  .scooter-frame svg{
+    width:82%;
+    height:82%;
+    overflow:visible;
+  }
+
+  /* Время */
+  .time-row{
+    grid-column:2;
+    grid-row:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding-left:1%;
+    white-space:nowrap;
+  }
+
+  #clock{
+    font-size:clamp(44px, 10.8vw, 122px);
+    line-height:.88;
+    color:white;
+    letter-spacing:.025em;
+    -webkit-text-stroke: 5px var(--outline);
+    paint-order:stroke fill;
+    text-shadow:
+      4px 4px 0 var(--outline),
+      -2px -2px 0 var(--outline),
+      2px -2px 0 var(--outline),
+      -2px 2px 0 var(--outline);
+  }
+
+  /* HP */
+  .hp-wrap{
+    grid-column:2;
+    grid-row:2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 2.2% 0 1.2%;
+  }
+
+  .hp-outer{
+    width:100%;
+    height:58%;
+    min-height:28px;
+    border:6px solid var(--outline);
+    background:#171717;
+    border-radius:13px;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);
+  }
+
+  #hp{
+    width:100%;
+    height:100%;
+    background:linear-gradient(180deg,var(--purple2) 0 34%,var(--purple) 35% 100%);
+    transition:width .35s cubic-bezier(.2,.8,.2,1);
+    box-shadow:
+      inset 0 3px 0 rgba(255,255,255,.28),
+      0 0 10px rgba(143,25,255,.5);
+  }
+
+  /* Деньги */
+  .money-row{
+    grid-column:2;
+    grid-row:3;
+    position:relative;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:3%;
+  }
+
+  #money{
+    color:var(--green);
+    font-size:clamp(54px, 13.4vw, 150px);
+    line-height:.9;
+    letter-spacing:.025em;
+    white-space:nowrap;
+    -webkit-text-stroke: 6px var(--outline);
+    paint-order:stroke fill;
+    text-shadow:
+      5px 5px 0 var(--outline),
+      -2px -2px 0 var(--outline),
+      2px -2px 0 var(--outline),
+      -2px 2px 0 var(--outline);
+  }
+
+  /* GTA +₽350 / -₽100 */
+  #moneyFx{
+    position:absolute;
+    right:6%;
+    top:-13%;
+    opacity:0;
+    font-size:clamp(25px,5.4vw,63px);
+    line-height:1;
+    white-space:nowrap;
+    -webkit-text-stroke:3px var(--outline);
+    paint-order:stroke fill;
+    text-shadow:3px 3px 0 var(--outline);
+  }
+
+  #moneyFx.plus{color:var(--green2)}
+  #moneyFx.minus{color:var(--red)}
+
+  #moneyFx.run{
+    animation:gtaMoney 1.35s ease-out forwards;
+  }
+
+  @keyframes gtaMoney{
+    0%   {opacity:0; transform:translateY(16px) scale(.88)}
+    12%  {opacity:1; transform:translateY(0) scale(1.10)}
+    25%  {opacity:1; transform:translateY(0) scale(1)}
+    72%  {opacity:1; transform:translateY(-5px) scale(1)}
+    100% {opacity:0; transform:translateY(-27px) scale(.98)}
+  }
+
+  #money.bump{animation:moneyBump .32s ease-out}
+  @keyframes moneyBump{
+    0%{transform:scale(1)}
+    40%{transform:scale(1.045)}
+    100%{transform:scale(1)}
+  }
+
+  /* Для проверки в браузере: добавь ?test=1 к URL */
+  #testPanel{
+    display:none;
+    position:fixed;
+    left:8px;
+    bottom:8px;
+    z-index:99;
+    gap:6px;
+    flex-wrap:wrap;
+    width:min(640px,95vw);
+    padding:10px;
+    background:rgba(0,0,0,.8);
+    pointer-events:auto;
+    font-family:Arial,sans-serif;
+  }
+  #testPanel.show{display:flex}
+  #testPanel input,#testPanel button{
+    font-size:16px;
+    padding:7px 9px;
+  }
+  #testPanel input{width:100px}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="scooter-box">
+    <div class="scooter-frame">
+      <!-- Самокат нарисован SVG, отдельная картинка не нужна -->
+      <svg viewBox="0 0 220 220" aria-hidden="true">
+        <!-- unmistakable electric kick-scooter silhouette: small wheels, long deck, vertical stem, no bicycle frame -->
+        <g fill="none" stroke="#050505" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="55" cy="174" r="21"/>
+          <circle cx="165" cy="174" r="21"/>
+          <!-- low battery deck -->
+          <path d="M55 174h79c11 0 20-5 25-13"/>
+          <path d="M72 154h65" stroke-width="16"/>
+          <!-- front fork and tall stem -->
+          <path d="M165 153l-11-37"/>
+          <path d="M154 116L136 43"/>
+          <!-- short folding neck -->
+          <path d="M154 116l-9 13"/>
+          <!-- wide handlebar with grips -->
+          <path d="M108 36h57"/>
+          <path d="M108 36l-10-3"/>
+          <path d="M165 36l10 3"/>
+          <!-- rear fender -->
+          <path d="M35 160c7-9 17-14 29-14"/>
+          <!-- front fender -->
+          <path d="M149 159c7-8 16-12 27-10"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="time-row">
+    <div id="clock">00:46 СПБ</div>
+  </div>
+
+  <div class="hp-wrap">
+    <div class="hp-outer">
+      <div id="hp"></div>
+    </div>
+  </div>
+
+  <div class="money-row">
+    <div id="money">₽ 0</div>
+    <div id="moneyFx"></div>
+  </div>
+</div>
+
+<div id="testPanel">
+  <input id="testValue" type="number" value="350" />
+  <button onclick="setMoney(testVal())">!set</button>
+  <button onclick="addMoney(testVal())">!add</button>
+  <button onclick="removeMoney(testVal())">!remove</button>
+  <button onclick="setHp(testVal())">!hp</button>
+  <button onclick="resetHud()">!reset</button>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const OWNER = "whynot778";
+  const STORAGE_KEY = "whynot778_gta_hud_v1";
+
+  const moneyEl = document.getElementById("money");
+  const moneyFxEl = document.getElementById("moneyFx");
+  const hpEl = document.getElementById("hp");
+  const clockEl = document.getElementById("clock");
+
+  let state = { money: 0, hp: 100 };
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+  function toInt(v){ return Math.trunc(Number(v) || 0); }
+
+  function load(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      if(Number.isFinite(Number(saved.money))) state.money = Math.max(0,toInt(saved.money));
+      if(Number.isFinite(Number(saved.hp))) state.hp = clamp(toInt(saved.hp),0,100);
+    }catch(_){}
+  }
+
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){}
+  }
+
+  function formatMoney(v){
+    return "₽ " + Number(v).toLocaleString("ru-RU");
+  }
+
+  function render(){
+    moneyEl.textContent = formatMoney(state.money);
+    hpEl.style.width = state.hp + "%";
+    save();
+  }
+
+  function bumpMoney(){
+    moneyEl.classList.remove("bump");
+    void moneyEl.offsetWidth;
+    moneyEl.classList.add("bump");
+  }
+
+  function showMoneyFx(amount, positive){
+    if(!amount) return;
+    moneyFxEl.classList.remove("run","plus","minus");
+    void moneyFxEl.offsetWidth;
+    moneyFxEl.textContent =
+      (positive ? "+ " : "- ") + "₽" + Math.abs(amount).toLocaleString("ru-RU");
+    moneyFxEl.classList.add(positive ? "plus" : "minus", "run");
+  }
+
+  window.setMoney = function(v){
+    state.money = Math.max(0,toInt(v));
+    render();
+    bumpMoney();
+  };
+
+  window.addMoney = function(v){
+    const amount = Math.max(0,toInt(v));
+    if(!amount) return;
+    state.money += amount;
+    render();
+    bumpMoney();
+    showMoneyFx(amount,true);
+  };
+
+  window.removeMoney = function(v){
+    const amount = Math.max(0,toInt(v));
+    if(!amount) return;
+    state.money = Math.max(0,state.money - amount);
+    render();
+    bumpMoney();
+    showMoneyFx(amount,false);
+  };
+
+  window.setHp = function(v){
+    state.hp = clamp(toInt(v),0,100);
+    render();
+  };
+
+  window.resetHud = function(){
+    state.money = 0;
+    state.hp = 100;
+    render();
+  };
+
+  /* Санкт-Петербург живёт по московскому времени.
+     Timezone задаём явно, поэтому время не зависит от часового пояса телефона. */
+  function updateClock(){
+    const time = new Intl.DateTimeFormat("ru-RU",{
+      timeZone:"Europe/Moscow",
+      hour:"2-digit",
+      minute:"2-digit",
+      hour12:false
+    }).format(new Date()).replace(".",":");
+
+    clockEl.textContent = time + " СПБ";
+  }
+
+  updateClock();
+  setInterval(updateClock,1000);
+
+  function textFromSegments(segments){
+    if(!Array.isArray(segments)) return "";
+    return segments.map(s => (s && typeof s.text === "string") ? s.text : "").join("").trim();
+  }
+
+  function parseCommand(text){
+    const t = String(text || "").trim();
+
+    let m;
+    if((m = t.match(/^!set\s+(\d+)$/i))) return setMoney(m[1]);
+    if((m = t.match(/^!add\s+(\d+)$/i))) return addMoney(m[1]);
+    if((m = t.match(/^!remove\s+(\d+)$/i))) return removeMoney(m[1]);
+    if((m = t.match(/^!hp\s+(\d{1,3})$/i))) return setHp(m[1]);
+    if(/^!reset$/i.test(t)) return resetHud();
+  }
+
+  function handleMoblinMessage(message){
+    if(!message || !message.chat) return;
+
+    const user = String(message.chat.user || "").toLowerCase().trim();
+    if(user !== OWNER.toLowerCase()) return;
+
+    /* В текущем Moblin ChatMessage содержит user + segments.
+       fallback на message оставлен для совместимости. */
+    const text =
+      textFromSegments(message.chat.segments) ||
+      String(message.chat.message || "").trim();
+
+    parseCommand(text);
+  }
+
+  function connectMoblin(){
+    if(typeof window.moblin === "undefined"){
+      console.log("Moblin API not detected (обычно это нормально вне Moblin).");
+      return;
+    }
+
+    try{
+      window.moblin.subscribe({chat:{prefix:"!"}});
+      window.moblin.onmessage = handleMoblinMessage;
+      console.log("Moblin HUD connected.");
+    }catch(err){
+      console.log("Moblin API error:",err);
+    }
+  }
+
+  window.testVal = () => document.getElementById("testValue").value;
+
+  if(new URLSearchParams(location.search).get("test") === "1"){
+    document.getElementById("testPanel").classList.add("show");
+  }
+
+  load();
+  render();
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", connectMoblin, {once:true});
+  }else{
+    connectMoblin();
+  }
+})();
+</script>
+</body>
+</html>
