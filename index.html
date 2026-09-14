@@ -104,11 +104,11 @@ body {
 .hpRow {
   display:flex;
   align-items:flex-start;
-  justify-content:center;
-  padding:0 1.2%;
+  justify-content:flex-start; /* прижать влево */
+  padding:0;
   margin-top:0;
 
-  transform:translateY(14px); /* полоска вниз на столько же */
+  transform:translateY(14px);
 }
 
 .hpOuter {
@@ -148,10 +148,11 @@ body {
   position:relative;
   display:flex;
   align-items:flex-start;
-  justify-content:center;
+  justify-content:flex-start; /* деньги влево */
   overflow:visible;
 
-  transform:translateY(-7px); /* деньги вверх */
+  padding-left:1.2%;          /* тот же левый край, что у времени и полоски */
+  transform:translateY(-10px);
 }
 #money {
   color:var(--green);
@@ -162,7 +163,7 @@ body {
   letter-spacing:-.015em;
   white-space:nowrap;
   transform:scaleX(1.08);
-  transform-origin:center top;
+  transform-origin:left top;
   -webkit-text-stroke:7px var(--black);
   paint-order:stroke fill;
   text-shadow:
